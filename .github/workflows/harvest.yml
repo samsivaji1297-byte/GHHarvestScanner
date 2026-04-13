@@ -28,7 +28,7 @@ jobs:
       - name: Run GHHarvestScanner engine
         run: node engine/scanner.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           GH_USERNAME: "samsivaji1297-byte"
           GH_REPO: "GHHarvestScanner"
 
