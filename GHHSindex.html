@@ -2,63 +2,139 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>GHHarvestScanner v1.0</title>
+  <title>GHHarvestScanner v1.3</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     html, body {
       width: 100%; height: 100%;
       background-color: #000;
       color: #dfe7f0;
       font-family: "IBM Plex Mono","JetBrains Mono",monospace;
     }
+
     #terminal-wrapper {
       display: flex; align-items: center; justify-content: center;
       min-height: 100vh; padding: 16px;
     }
+
+    /* Contained panel with refined industrial border */
     #terminal-container {
-      background: #000; border: 1px solid #2a2f33;
-      max-width: 900px; width: 100%; max-height: 80vh;
-      padding: 16px 20px; position: relative; overflow: hidden;
+      background-color: #000;
+      border: 2px solid #3a3f44; /* thicker, more industrial */
+      max-width: 960px;
+      width: 100%;
+      max-height: 85vh;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
     }
-    #terminal-container::before {
-      content: ""; position: absolute; inset: 0;
+
+    /* Header bar */
+    #terminal-header {
+      width: 100%;
+      padding: 10px 16px;
+      background-color: #0a0d10;
+      border-bottom: 2px solid #3a3f44;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+
+    #terminal-header-title {
+      color: #dfe7f0;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    #terminal-header-datetime {
+      color: #9aa5b1;
+      font-size: 14px;
+    }
+
+    /* Terminal body */
+    #terminal-body {
+      padding: 20px 24px;
+      position: relative;
+    }
+
+    /* Subtle scanlines */
+    #terminal-body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
       background-image: linear-gradient(
         rgba(255,255,255,0.03) 1px, transparent 1px
       );
-      background-size: 100% 3px; opacity: 0.15; pointer-events: none;
+      background-size: 100% 3px;
+      opacity: 0.15;
+      pointer-events: none;
     }
+
     #terminal-output {
-      white-space: pre-wrap; line-height: 1.4; font-size: 14px;
-      padding-bottom: 8px; position: relative; z-index: 1;
+      white-space: pre-wrap;
+      overflow-wrap: normal;
+      line-height: 1.45;
+      font-size: 15px;
+      padding-bottom: 12px;
+      position: relative;
+      z-index: 1;
     }
+
     #terminal-input-line {
-      display: flex; align-items: center; gap: 6px;
-      position: relative; z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
     }
+
     #terminal-cursor {
       color: #dfe7f0;
       text-shadow: 0 0 6px rgba(78,163,255,0.8);
+      margin-left: 2px;
     }
   </style>
 </head>
 <body>
   <div id="terminal-wrapper">
     <div id="terminal-container">
-      <pre id="terminal-output"></pre>
-      <div id="terminal-input-line">
-        <span>&gt;</span>
-        <span id="terminal-input"></span>
-        <span id="terminal-cursor">█</span>
+
+      <!-- Header Bar -->
+      <div id="terminal-header">
+        <div id="terminal-header-title">GitHub Harvest and Scanner</div>
+        <div id="terminal-header-datetime"></div>
       </div>
+
+      <!-- Terminal Body -->
+      <div id="terminal-body">
+        <pre id="terminal-output"></pre>
+        <div id="terminal-input-line">
+          <span>&gt;</span>
+          <span id="terminal-input"></span>
+          <span id="terminal-cursor">█</span>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <script>
     let outputEl, inputEl, inputBuffer = "";
 
+    function updateDateTime() {
+      const now = new Date();
+      const formatted =
+        now.toLocaleDateString("en-AU") + " " +
+        now.toLocaleTimeString("en-AU", { hour12: false });
+      document.getElementById("terminal-header-datetime").textContent = formatted;
+    }
+
     const preIgnitionFrame = [
-      "GHHarvestScanner v1.0",
+      "GHHarvestScanner v1.3",
       "────────────────────────────────────────────────────────────",
       "MODE: A — Fork Acquisition",
       "STATE: PRE-IGNITION",
@@ -139,7 +215,9 @@
       outputEl = document.getElementById("terminal-output");
       inputEl = document.getElementById("terminal-input");
 
+      updateDateTime();
       setFrame(preIgnitionFrame);
+
       document.addEventListener("keydown", onKeyDown);
     });
   </script>
