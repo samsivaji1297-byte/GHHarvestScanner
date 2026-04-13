@@ -16,15 +16,11 @@ const headers = {
   "Accept": "application/vnd.github+json"
 };
 
-async function searchDormantRepos() {
-  const query = [
-    "stars:10..300",
-    "license:mit OR license:apache-2.0",
-    "pushed:<2023-01-01",
-    "archived:false",
-    "fork:false"
-  ].join(" ");
+// -------------------------------
+// 1. SEARCH HELPERS
+// -------------------------------
 
+async function searchRepos(query) {
   const url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=20`;
 
   const res = await fetch(url, { headers });
@@ -35,14 +31,50 @@ async function searchDormantRepos() {
     return [];
   }
 
-  return data.items.map(r => ({
+  return data.items;
+}
+
+async function searchDormantRepos() {
+  console.log("🔍 Searching for dormant repos...");
+
+  // Query 1 — MIT
+  const q1 = [
+    "stars:10..300",
+    "license:mit",
+    "pushed:<2023-01-01",
+    "archived:false",
+    "fork:false"
+  ].join(" ");
+
+  // Query 2 — Apache
+  const q2 = [
+    "stars:10..300",
+    "license:apache-2.0",
+    "pushed:<2023-01-01",
+    "archived:false",
+    "fork:false"
+  ].join(" ");
+
+  const mitRepos = await searchRepos(q1);
+  const apacheRepos = await searchRepos(q2);
+
+  const combined = [...mitRepos, ...apacheRepos];
+
+  // Filter in code (Option B)
+  const filtered = combined.map(r => ({
     full_name: r.full_name,
     html_url: r.html_url,
     stars: r.stargazers_count,
     last_push: r.pushed_at,
     license: r.license?.spdx_id || "Unknown"
   }));
+
+  return filtered;
 }
+
+// -------------------------------
+// 2. FORK LOGIC
+// -------------------------------
 
 async function forkRepo(fullName) {
   const url = `https://api.github.com/repos/${fullName}/forks`;
@@ -59,6 +91,10 @@ async function forkRepo(fullName) {
     return { success: false, error: err };
   }
 }
+
+// -------------------------------
+// 3. MAIN ENGINE
+// -------------------------------
 
 async function run() {
   console.log("🔍 GHHarvestScanner: Starting scan...");
