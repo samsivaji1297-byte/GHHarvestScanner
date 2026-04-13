@@ -1,0 +1,33 @@
+name: GHHarvestScanner
+
+on:
+  workflow_dispatch:   # Manual trigger only
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write        # Needed to write logs back to repo
+      actions: read
+      pull-requests: write
+      repository-projects: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install node-fetch@3
+
+      - name: Run GHHarvestScanner engine
+        run: node engine/scanner.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USERNAME: "samsivaji1297-byte"
+          GH_REPO: "GHHarvestScanner"
