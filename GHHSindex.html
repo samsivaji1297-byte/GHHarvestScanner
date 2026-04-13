@@ -22,7 +22,7 @@
     /* Contained panel with refined industrial border */
     #terminal-container {
       background-color: #000;
-      border: 2px solid #3a3f44; /* thicker, more industrial */
+      border: 2px solid #3a3f44;
       max-width: 960px;
       width: 100%;
       max-height: 85vh;
@@ -53,6 +53,7 @@
     #terminal-header-datetime {
       color: #9aa5b1;
       font-size: 14px;
+      font-family: "IBM Plex Mono","JetBrains Mono",monospace;
     }
 
     /* Terminal body */
@@ -74,9 +75,11 @@
       pointer-events: none;
     }
 
+    /* FIXED: true terminal behaviour */
     #terminal-output {
-      white-space: pre-wrap;
-      overflow-wrap: normal;
+      white-space: pre;          /* no wrapping */
+      overflow-x: auto;          /* horizontal scroll for long lines */
+      overflow-y: auto;
       line-height: 1.45;
       font-size: 15px;
       padding-bottom: 12px;
@@ -125,12 +128,22 @@
   <script>
     let outputEl, inputEl, inputBuffer = "";
 
+    /* FIXED: Live datetime stamp */
     function updateDateTime() {
       const now = new Date();
-      const formatted =
-        now.toLocaleDateString("en-AU") + " " +
-        now.toLocaleTimeString("en-AU", { hour12: false });
-      document.getElementById("terminal-header-datetime").textContent = formatted;
+
+      const date = now.toLocaleDateString("en-AU", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      }).toUpperCase();
+
+      const time = now.toLocaleTimeString("en-AU", {
+        hour12: false
+      });
+
+      document.getElementById("terminal-header-datetime").textContent =
+        `${date} • ${time}`;
     }
 
     const preIgnitionFrame = [
@@ -145,15 +158,15 @@
       "AWAITING COMMAND",
       "────────────────────────────────────────────────────────────",
       ""
-    ].join("\\n");
+    ].join("\n");
 
     function print(t="") {
-      outputEl.textContent += t + "\\n";
+      outputEl.textContent += t + "\n";
       outputEl.scrollTop = outputEl.scrollHeight;
     }
 
     function setFrame(t) {
-      outputEl.textContent = t + "\\n";
+      outputEl.textContent = t + "\n";
     }
 
     function handleCommand(cmdRaw) {
@@ -216,6 +229,8 @@
       inputEl = document.getElementById("terminal-input");
 
       updateDateTime();
+      setInterval(updateDateTime, 1000);  // <-- LIVE CLOCK FIX
+
       setFrame(preIgnitionFrame);
 
       document.addEventListener("keydown", onKeyDown);
