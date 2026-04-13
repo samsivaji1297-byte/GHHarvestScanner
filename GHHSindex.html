@@ -5,98 +5,40 @@
   <title>GHHarvestScanner v1.0</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
-      width: 100%;
-      height: 100%;
-      background-color: #000000;
+      width: 100%; height: 100%;
+      background-color: #000;
       color: #dfe7f0;
-      font-family: "IBM Plex Mono", "JetBrains Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-family: "IBM Plex Mono","JetBrains Mono",monospace;
     }
-
     #terminal-wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 16px;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 16px;
     }
-
     #terminal-container {
-      background-color: #000000;
-      border: 1px solid #2a2f33;
-      max-width: 900px;
-      width: 100%;
-      max-height: 80vh;
-      padding: 16px 20px;
-      position: relative;
-      overflow: hidden;
+      background: #000; border: 1px solid #2a2f33;
+      max-width: 900px; width: 100%; max-height: 80vh;
+      padding: 16px 20px; position: relative; overflow: hidden;
     }
-
     #terminal-container::before {
-      content: "";
-      position: absolute;
-      inset: 0;
+      content: ""; position: absolute; inset: 0;
       background-image: linear-gradient(
-        rgba(255, 255, 255, 0.03) 1px,
-        transparent 1px
+        rgba(255,255,255,0.03) 1px, transparent 1px
       );
-      background-size: 100% 3px;
-      pointer-events: none;
-      opacity: 0.15;
+      background-size: 100% 3px; opacity: 0.15; pointer-events: none;
     }
-
     #terminal-output {
-      white-space: pre-wrap;
-      line-height: 1.4;
-      font-size: 14px;
-      padding-bottom: 8px;
-      z-index: 1;
-      position: relative;
+      white-space: pre-wrap; line-height: 1.4; font-size: 14px;
+      padding-bottom: 8px; position: relative; z-index: 1;
     }
-
     #terminal-input-line {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 1;
-      position: relative;
+      display: flex; align-items: center; gap: 6px;
+      position: relative; z-index: 1;
     }
-
-    .prompt {
-      color: #dfe7f0;
-    }
-
-    #terminal-input {
-      min-height: 1em;
-    }
-
     #terminal-cursor {
-      display: inline-block;
       color: #dfe7f0;
-      text-shadow: 0 0 6px rgba(78, 163, 255, 0.8);
-    }
-
-    @media (min-width: 960px) {
-      #terminal-container {
-        width: 900px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      #terminal-container {
-        max-width: 100%;
-        padding: 12px 14px;
-      }
-
-      #terminal-output {
-        font-size: 13px;
-      }
+      text-shadow: 0 0 6px rgba(78,163,255,0.8);
     }
   </style>
 </head>
@@ -105,7 +47,7 @@
     <div id="terminal-container">
       <pre id="terminal-output"></pre>
       <div id="terminal-input-line">
-        <span class="prompt">&gt;</span>
+        <span>&gt;</span>
         <span id="terminal-input"></span>
         <span id="terminal-cursor">█</span>
       </div>
@@ -113,10 +55,7 @@
   </div>
 
   <script>
-    const outputEl = document.getElementById("terminal-output");
-    const inputEl = document.getElementById("terminal-input");
-
-    let inputBuffer = "";
+    let outputEl, inputEl, inputBuffer = "";
 
     const preIgnitionFrame = [
       "GHHarvestScanner v1.0",
@@ -132,41 +71,40 @@
       ""
     ].join("\\n");
 
-    function print(text = "") {
-      outputEl.textContent += text + "\\n";
+    function print(t="") {
+      outputEl.textContent += t + "\\n";
       outputEl.scrollTop = outputEl.scrollHeight;
     }
 
-    function setFrame(text) {
-      outputEl.textContent = text + "\\n";
+    function setFrame(t) {
+      outputEl.textContent = t + "\\n";
     }
 
     function handleCommand(cmdRaw) {
       const cmd = cmdRaw.trim().toUpperCase();
       if (!cmd) return;
 
-      switch (cmd) {
-        case "HELP":
-          print("AVAILABLE COMMANDS:");
-          print("  HELP   - list commands");
-          print("  SCAN   - describe scan behavior (v1.0 placeholder)");
-          print("  CLEAR  - clear terminal");
-          break;
-
-        case "CLEAR":
-          setFrame(preIgnitionFrame);
-          break;
-
-        case "SCAN":
-          print("SCAN: v1.0 placeholder.");
-          print("      Future: query GitHub API for dormant repos matching filters.");
-          break;
-
-        default:
-          print(\`UNKNOWN COMMAND: \${cmdRaw}\`);
-          print("TYPE 'HELP' FOR AVAILABLE COMMANDS.");
-          break;
+      if (cmd === "HELP") {
+        print("AVAILABLE COMMANDS:");
+        print("  HELP   - list commands");
+        print("  SCAN   - describe scan behavior (v1.0 placeholder)");
+        print("  CLEAR  - clear terminal");
+        return;
       }
+
+      if (cmd === "CLEAR") {
+        setFrame(preIgnitionFrame);
+        return;
+      }
+
+      if (cmd === "SCAN") {
+        print("SCAN: v1.0 placeholder.");
+        print("      Future: GitHub API scan for dormant repos.");
+        return;
+      }
+
+      print("UNKNOWN COMMAND: " + cmdRaw);
+      print("TYPE 'HELP' FOR AVAILABLE COMMANDS.");
     }
 
     function renderInput() {
@@ -174,38 +112,36 @@
     }
 
     function onKeyDown(e) {
-      const key = e.key;
-
-      if (key === "Backspace") {
+      if (e.key === "Backspace") {
         inputBuffer = inputBuffer.slice(0, -1);
         renderInput();
         e.preventDefault();
         return;
       }
 
-      if (key === "Enter") {
-        const current = inputBuffer;
-        print(\`> \${current}\`);
-        handleCommand(current);
+      if (e.key === "Enter") {
+        print("> " + inputBuffer);
+        handleCommand(inputBuffer);
         inputBuffer = "";
         renderInput();
         e.preventDefault();
         return;
       }
 
-      if (key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        inputBuffer += key;
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        inputBuffer += e.key;
         renderInput();
         e.preventDefault();
       }
     }
 
-    function initTerminal() {
+    document.addEventListener("DOMContentLoaded", () => {
+      outputEl = document.getElementById("terminal-output");
+      inputEl = document.getElementById("terminal-input");
+
       setFrame(preIgnitionFrame);
       document.addEventListener("keydown", onKeyDown);
-    }
-
-    initTerminal();
+    });
   </script>
 </body>
 </html>
