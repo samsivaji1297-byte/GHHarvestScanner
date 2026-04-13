@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GHHarvestScanner v1.0</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #000000;
+      color: #dfe7f0;
+      font-family: "IBM Plex Mono", "JetBrains Mono", Menlo, Monaco, Consolas, "Courier New", monospace;
+    }
+
+    #terminal-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    #terminal-container {
+      background-color: #000000;
+      border: 1px solid #2a2f33;
+      max-width: 900px;
+      width: 100%;
+      max-height: 80vh;
+      padding: 16px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #terminal-container::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(
+        rgba(255, 255, 255, 0.03) 1px,
+        transparent 1px
+      );
+      background-size: 100% 3px;
+      pointer-events: none;
+      opacity: 0.15;
+    }
+
+    #terminal-output {
+      white-space: pre-wrap;
+      line-height: 1.4;
+      font-size: 14px;
+      padding-bottom: 8px;
+      z-index: 1;
+      position: relative;
+    }
+
+    #terminal-input-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .prompt {
+      color: #dfe7f0;
+    }
+
+    #terminal-input {
+      min-height: 1em;
+    }
+
+    #terminal-cursor {
+      display: inline-block;
+      color: #dfe7f0;
+      text-shadow: 0 0 6px rgba(78, 163, 255, 0.8);
+    }
+
+    @media (min-width: 960px) {
+      #terminal-container {
+        width: 900px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      #terminal-container {
+        max-width: 100%;
+        padding: 12px 14px;
+      }
+
+      #terminal-output {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal-wrapper">
+    <div id="terminal-container">
+      <pre id="terminal-output"></pre>
+      <div id="terminal-input-line">
+        <span class="prompt">&gt;</span>
+        <span id="terminal-input"></span>
+        <span id="terminal-cursor">█</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const outputEl = document.getElementById("terminal-output");
+    const inputEl = document.getElementById("terminal-input");
+
+    let inputBuffer = "";
+
+    const preIgnitionFrame = [
+      "GHHarvestScanner v1.0",
+      "────────────────────────────────────────────────────────────",
+      "MODE: A — Fork Acquisition",
+      "STATE: PRE-IGNITION",
+      "RANGE: dormant GitHub repositories",
+      "FILTERS: last_commit > 24mo | MIT/Apache | stars: 10–300",
+      "",
+      "STATUS: SYSTEM IDLE",
+      "AWAITING COMMAND",
+      "────────────────────────────────────────────────────────────",
+      ""
+    ].join("\\n");
+
+    function print(text = "") {
+      outputEl.textContent += text + "\\n";
+      outputEl.scrollTop = outputEl.scrollHeight;
+    }
+
+    function setFrame(text) {
+      outputEl.textContent = text + "\\n";
+    }
+
+    function handleCommand(cmdRaw) {
+      const cmd = cmdRaw.trim().toUpperCase();
+      if (!cmd) return;
+
+      switch (cmd) {
+        case "HELP":
+          print("AVAILABLE COMMANDS:");
+          print("  HELP   - list commands");
+          print("  SCAN   - describe scan behavior (v1.0 placeholder)");
+          print("  CLEAR  - clear terminal");
+          break;
+
+        case "CLEAR":
+          setFrame(preIgnitionFrame);
+          break;
+
+        case "SCAN":
+          print("SCAN: v1.0 placeholder.");
+          print("      Future: query GitHub API for dormant repos matching filters.");
+          break;
+
+        default:
+          print(\`UNKNOWN COMMAND: \${cmdRaw}\`);
+          print("TYPE 'HELP' FOR AVAILABLE COMMANDS.");
+          break;
+      }
+    }
+
+    function renderInput() {
+      inputEl.textContent = inputBuffer;
+    }
+
+    function onKeyDown(e) {
+      const key = e.key;
+
+      if (key === "Backspace") {
+        inputBuffer = inputBuffer.slice(0, -1);
+        renderInput();
+        e.preventDefault();
+        return;
+      }
+
+      if (key === "Enter") {
+        const current = inputBuffer;
+        print(\`> \${current}\`);
+        handleCommand(current);
+        inputBuffer = "";
+        renderInput();
+        e.preventDefault();
+        return;
+      }
+
+      if (key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        inputBuffer += key;
+        renderInput();
+        e.preventDefault();
+      }
+    }
+
+    function initTerminal() {
+      setFrame(preIgnitionFrame);
+      document.addEventListener("keydown", onKeyDown);
+    }
+
+    initTerminal();
+  </script>
+</body>
+</html>
