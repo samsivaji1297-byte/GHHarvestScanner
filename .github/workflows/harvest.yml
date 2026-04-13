@@ -31,3 +31,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USERNAME: "samsivaji1297-byte"
           GH_REPO: "GHHarvestScanner"
+
+      - name: Commit log file
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add logs/*.json
+          git commit -m "Add scan log"
+          git push
